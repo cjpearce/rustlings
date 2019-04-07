@@ -5,7 +5,7 @@ use indicatif::ProgressBar;
 use std::fs;
 use toml::Value;
 
-pub fn run(matches: clap::ArgMatches) -> Result<(), ()> {
+pub fn run(matches: &clap::ArgMatches) -> Result<(), ()> {
     if let Some(filename) = matches.value_of("file") {
         let toml: Value = fs::read_to_string("info.toml").unwrap().parse().unwrap();
         let tomlvec: &Vec<Value> = toml.get("exercises").unwrap().as_array().unwrap();

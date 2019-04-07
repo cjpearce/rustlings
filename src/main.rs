@@ -36,18 +36,6 @@ fn main() {
     let ss = SyntaxSet::load_defaults_newlines();
     let ts = ThemeSet::load_defaults();
 
-    if None == matches.subcommand_name() {
-        println!();
-        println!(r#"       welcome to...                      "#);
-        println!(r#"                 _   _ _                  "#);
-        println!(r#"  _ __ _   _ ___| |_| (_)_ __   __ _ ___  "#);
-        println!(r#" | '__| | | / __| __| | | '_ \ / _` / __| "#);
-        println!(r#" | |  | |_| \__ \ |_| | | | | | (_| \__ \ "#);
-        println!(r#" |_|   \__,_|___/\__|_|_|_| |_|\__, |___/ "#);
-        println!(r#"                               |___/      "#);
-        println!();
-    }
-
     if !Path::new("info.toml").exists() {
         println!(
             "{} must be run from the rustlings directory",
@@ -56,26 +44,29 @@ fn main() {
         std::process::exit(1);
     }
 
-    if let Some(matches) = matches.subcommand_matches("run") {
-        run(matches.clone()).unwrap_or_else(|_| std::process::exit(1));
-    }
-
-    if matches.subcommand_matches("verify").is_some() {
-        verify(None).unwrap_or_else(|_| std::process::exit(1));
-    }
-
-    if matches.subcommand_matches("watch").is_some() {
-        watch().unwrap();
-    }
-
-    if matches.subcommand_name().is_none() {
-        let mut highlighter =
-            HighlightFile::new("default_out.md", &ss, &ts.themes["base16-eighties.dark"]).unwrap();
-        for maybe_line in highlighter.reader.lines() {
-            let line = maybe_line.unwrap();
-            let regions: Vec<(Style, &str)> = highlighter.highlight_lines.highlight(&line, &ss);
-            println!("{}", as_24_bit_terminal_escaped(&regions[..], true));
-        }
+    match matches.subcommand() {
+        ("run", Some(matches)) => run(matches).unwrap_or_else(|_| std::process::exit(1)),
+        ("verify", Some(_)) => verify(None).unwrap_or_else(|_| std::process::exit(1)),
+        ("watch", Some(_)) => watch().unwrap(),
+        (_, _) => {
+            println!();
+            println!(r#"       welcome to...                      "#);
+            println!(r#"                 _   _ _                  "#);
+            println!(r#"  _ __ _   _ ___| |_| (_)_ __   __ _ ___  "#);
+            println!(r#" | '__| | | / __| __| | | '_ \ / _` / __| "#);
+            println!(r#" | |  | |_| \__ \ |_| | | | | | (_| \__ \ "#);
+            println!(r#" |_|   \__,_|___/\__|_|_|_| |_|\__, |___/ "#);
+            println!(r#"                               |___/      "#);
+            println!();
+            let mut highlighter =
+                HighlightFile::new("default_out.md", &ss, &ts.themes["base16-eighties.dark"])
+                    .unwrap();
+            for maybe_line in highlighter.reader.lines() {
+                let line = maybe_line.unwrap();
+                let regions: Vec<(Style, &str)> = highlighter.highlight_lines.highlight(&line, &ss);
+                println!("{}", as_24_bit_terminal_escaped(&regions[..], true));
+            }
+        },
     }
 
     println!("\x1b[0m");
